@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "76695965127",
+    "project_id": "payvera-42eca",
+    "storage_bucket": "payvera-42eca.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:76695965127:android:95cb7f93b090adba681de2",
+        "android_client_info": {
+          "package_name": "com.example.payvera_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCu5bij-TNHBfZJwXGQuRlfNJOLB9V-fqQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
