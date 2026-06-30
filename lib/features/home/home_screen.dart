@@ -53,7 +53,7 @@ class _DashboardPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Hello, Yusuf 👋', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const Text('Hello 👋', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
             const Text('Welcome to Payvera', style: TextStyle(color: Colors.grey)),
             const SizedBox(height: 24),
@@ -69,10 +69,7 @@ class _DashboardPage extends StatelessWidget {
                 children: [
                   Text('Wallet Balance', style: TextStyle(color: Colors.white70)),
                   SizedBox(height: 10),
-                  Text(
-                    '₦0.00',
-                    style: TextStyle(color: AppTheme.white, fontSize: 34, fontWeight: FontWeight.bold),
-                  ),
+                  Text('₦0.00', style: TextStyle(color: AppTheme.white, fontSize: 34, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
                   Text('Fast. Secure. Borderless.', style: TextStyle(color: AppTheme.gold)),
                 ],
