@@ -324,6 +324,7 @@ class _QuickActions extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       crossAxisSpacing: AppSpacing.md,
       mainAxisSpacing: AppSpacing.md,
+      childAspectRatio: 0.88,
       children: const [
         _ActionItem(title: 'Send', icon: AppIcons.send),
         _ActionItem(title: 'Receive', icon: AppIcons.receive),
