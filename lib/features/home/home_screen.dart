@@ -1,13 +1,16 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../wallet/wallet_screen.dart';
+
 import '../../core/design/app_icons.dart';
 import '../../core/design/app_radius.dart';
 import '../../core/design/app_spacing.dart';
 import '../../core/theme/colors/app_colors.dart';
 import '../../core/theme/components/app_cards.dart';
 import '../../core/theme/typography/app_typography.dart';
+import '../../models/transaction_model.dart';
 import '../../services/firestore_service.dart';
+import '../activity/activity_screen.dart';
+import '../wallet/wallet_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _DashboardPage(),
     WalletScreen(),
     _SimplePage(title: 'Scan', icon: AppIcons.qr),
-    _SimplePage(title: 'Activity', icon: AppIcons.activity),
+    ActivityScreen(),
     _SimplePage(title: 'Profile', icon: AppIcons.profile),
   ];
 
@@ -41,7 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
           NavigationDestination(icon: Icon(AppIcons.home), label: 'Home'),
           NavigationDestination(icon: Icon(AppIcons.wallet), label: 'Wallet'),
           NavigationDestination(icon: Icon(AppIcons.qr), label: 'Scan'),
-          NavigationDestination(icon: Icon(AppIcons.activity), label: 'Activity'),
+          NavigationDestination(
+            icon: Icon(AppIcons.activity),
+            label: 'Activity',
+          ),
           NavigationDestination(icon: Icon(AppIcons.profile), label: 'Profile'),
         ],
       ),
@@ -98,7 +104,8 @@ class _DashboardPageState extends State<_DashboardPage> {
       final walletData = walletDoc.data();
 
       if (walletData != null) {
-        balance = (walletData['balance'] ?? 0).toDouble();
+        balance = (walletData['availableBalance'] ?? walletData['balance'] ?? 0)
+            .toDouble();
         currency = walletData['currency'] ?? 'NGN';
       }
     }
@@ -159,33 +166,22 @@ class _DashboardPageState extends State<_DashboardPage> {
               const SizedBox(height: AppSpacing.lg),
               const _QuickActions(),
               const SizedBox(height: AppSpacing.xxl),
-              const Text('Recent Activity', style: AppTypography.title),
-              const SizedBox(height: AppSpacing.lg),
-              const PayveraCard(
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.receipt_long_rounded,
-                      size: 44,
+              Row(
+                children: const [
+                  Expanded(
+                    child: Text('Recent Activity', style: AppTypography.title),
+                  ),
+                  Text(
+                    'Live',
+                    style: TextStyle(
                       color: AppColors.secondary,
+                      fontWeight: FontWeight.w700,
                     ),
-                    SizedBox(height: AppSpacing.md),
-                    Text(
-                      'No transactions yet',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    SizedBox(height: AppSpacing.sm),
-                    Text(
-                      'Your payments, transfers, and wallet activity will appear here.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              const SizedBox(height: AppSpacing.lg),
+              _RecentActivity(walletId: walletId),
             ],
           ),
         ),
@@ -245,11 +241,7 @@ class _WalletCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: AppRadius.extraLarge,
         gradient: const LinearGradient(
-          colors: [
-            AppColors.primary,
-            Color(0xFF172554),
-            AppColors.secondary,
-          ],
+          colors: [AppColors.primary, Color(0xFF172554), AppColors.secondary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -303,10 +295,7 @@ class _WalletCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
-          const Text(
-            'Active Wallet',
-            style: TextStyle(color: Colors.white70),
-          ),
+          const Text('Active Wallet', style: TextStyle(color: Colors.white70)),
         ],
       ),
     );
@@ -354,9 +343,171 @@ class _ActionItem extends StatelessWidget {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecentActivity extends StatelessWidget {
+  const _RecentActivity({required this.walletId});
+
+  final String walletId;
+
+  @override
+  Widget build(BuildContext context) {
+    if (walletId.isEmpty) {
+      return const PayveraCard(
+        child: Text(
+          'Wallet is still loading.',
+          style: TextStyle(color: AppColors.textSecondary),
+        ),
+      );
+    }
+
+    final service = FirestoreService();
+
+    return StreamBuilder<List<TransactionModel>>(
+      stream: service.watchWalletTransactions(walletId, limit: 3),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const PayveraCard(
+            child: Text(
+              'Unable to load recent activity.',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
+          );
+        }
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const PayveraCard(
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.secondary),
+            ),
+          );
+        }
+
+        final transactions = snapshot.data ?? [];
+
+        if (transactions.isEmpty) {
+          return const PayveraCard(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.receipt_long_rounded,
+                  size: 44,
+                  color: AppColors.secondary,
+                ),
+                SizedBox(height: AppSpacing.md),
+                Text(
+                  'No transactions yet',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: AppSpacing.sm),
+                Text(
+                  'Your payments, transfers, and wallet activity will appear here.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Column(
+          children: transactions
+              .map(
+                (transaction) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                  child: _RecentTransactionTile(transaction: transaction),
+                ),
+              )
+              .toList(),
+        );
+      },
+    );
+  }
+}
+
+class _RecentTransactionTile extends StatelessWidget {
+  const _RecentTransactionTile({required this.transaction});
+
+  final TransactionModel transaction;
+
+  bool get isCredit => transaction.direction == TransactionDirection.credit;
+
+  String get amountText {
+    final prefix = isCredit ? '+' : '-';
+    final currency = transaction.currency == 'NGN' ? '₦' : transaction.currency;
+    return '$prefix$currency${transaction.amount.toStringAsFixed(2)}';
+  }
+
+  Color get statusColor {
+    switch (transaction.status) {
+      case TransactionStatus.successful:
+        return AppColors.success;
+      case TransactionStatus.failed:
+      case TransactionStatus.cancelled:
+        return AppColors.error;
+      case TransactionStatus.reversed:
+        return AppColors.warning;
+      case TransactionStatus.initiated:
+      case TransactionStatus.pending:
+      case TransactionStatus.processing:
+        return AppColors.secondary;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PayveraCard(
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: statusColor.withValues(alpha: 0.12),
+            child: Icon(
+              isCredit ? Icons.call_received_rounded : Icons.call_made_rounded,
+              color: statusColor,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  transaction.description.isEmpty
+                      ? transaction.type.name
+                      : transaction.description,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  transaction.status.name.toUpperCase(),
+                  style: TextStyle(
+                    color: statusColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            amountText,
+            style: TextStyle(
+              color: isCredit ? AppColors.success : AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],

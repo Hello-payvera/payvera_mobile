@@ -1,15 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../models/transaction_model.dart';
+
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   String generatePayveraId(String fullName) {
-    final cleaned = fullName
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9]'), '');
+    final cleaned = fullName.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
 
-    final suffix =
-        DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    final suffix = DateTime.now().millisecondsSinceEpoch.toString().substring(
+      8,
+    );
 
     return '@$cleaned$suffix';
   }
@@ -40,21 +41,13 @@ class FirestoreService {
     batch.set(walletRef, {
       'walletId': walletId,
       'ownerUid': uid,
-
-      // Financial balances.
-      // The mobile client must never directly modify these fields.
       'availableBalance': 0.0,
       'ledgerBalance': 0.0,
-
       'currency': 'NGN',
       'status': 'active',
       'isFrozen': false,
-
-      // Temporary default limits.
-      // Later these will come from KYC tier and server-side policy.
       'dailyLimit': 0.0,
       'monthlyLimit': 0.0,
-
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
@@ -72,5 +65,38 @@ class FirestoreService {
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> watchWallet(String walletId) {
     return _db.collection('wallets').doc(walletId).snapshots();
+  }
+
+  Stream<List<TransactionModel>> watchWalletTransactions(
+    String walletId, {
+    int limit = 20,
+  }) {
+    return _db
+        .collection('transactions')
+        .where('walletId', isEqualTo: walletId)
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => TransactionModel.fromMap(doc.data()))
+              .toList(),
+        );
+  }
+
+  Future<List<TransactionModel>> getWalletTransactions(
+    String walletId, {
+    int limit = 20,
+  }) async {
+    final snapshot = await _db
+        .collection('transactions')
+        .where('walletId', isEqualTo: walletId)
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
+        .get();
+
+    return snapshot.docs
+        .map((doc) => TransactionModel.fromMap(doc.data()))
+        .toList();
   }
 }
