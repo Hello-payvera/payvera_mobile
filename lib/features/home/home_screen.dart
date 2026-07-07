@@ -1,7 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
+import '../../core/design/app_icons.dart';
+import '../../core/design/app_radius.dart';
+import '../../core/design/app_spacing.dart';
+import '../../core/theme/colors/app_colors.dart';
+import '../../core/theme/components/app_cards.dart';
+import '../../core/theme/typography/app_typography.dart';
 import '../../services/firestore_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,31 +21,28 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final pages = const [
     _DashboardPage(),
-    _SimplePage(title: 'Wallet', icon: Icons.account_balance_wallet),
-    _SimplePage(title: 'QR Payments', icon: Icons.qr_code_scanner),
-    _SimplePage(title: 'Merchant', icon: Icons.storefront),
-    _SimplePage(title: 'Profile', icon: Icons.person),
+    _SimplePage(title: 'Wallet', icon: AppIcons.wallet),
+    _SimplePage(title: 'Scan', icon: AppIcons.qr),
+    _SimplePage(title: 'Activity', icon: AppIcons.activity),
+    _SimplePage(title: 'Profile', icon: AppIcons.profile),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: pages[currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: AppTheme.green,
-        unselectedItemColor: Colors.grey,
-        onTap: (index) => setState(() => currentIndex = index),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet),
-            label: 'Wallet',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.qr_code_scanner), label: 'QR'),
-          BottomNavigationBarItem(icon: Icon(Icons.storefront), label: 'Merchant'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: currentIndex,
+        backgroundColor: AppColors.surface,
+        indicatorColor: AppColors.secondary.withValues(alpha: 0.12),
+        onDestinationSelected: (index) => setState(() => currentIndex = index),
+        destinations: const [
+          NavigationDestination(icon: Icon(AppIcons.home), label: 'Home'),
+          NavigationDestination(icon: Icon(AppIcons.wallet), label: 'Wallet'),
+          NavigationDestination(icon: Icon(AppIcons.qr), label: 'Scan'),
+          NavigationDestination(icon: Icon(AppIcons.activity), label: 'Activity'),
+          NavigationDestination(icon: Icon(AppIcons.profile), label: 'Profile'),
         ],
       ),
     );
@@ -59,6 +61,7 @@ class _DashboardPageState extends State<_DashboardPage> {
   final currentUser = FirebaseAuth.instance.currentUser;
 
   bool isLoading = true;
+  bool showBalance = true;
 
   String fullName = '';
   String payveraId = '';
@@ -100,9 +103,7 @@ class _DashboardPageState extends State<_DashboardPage> {
       }
     }
 
-    if (mounted) {
-      setState(() => isLoading = false);
-    }
+    if (mounted) setState(() => isLoading = false);
   }
 
   String get firstName {
@@ -110,82 +111,80 @@ class _DashboardPageState extends State<_DashboardPage> {
     return fullName.trim().split(' ').first;
   }
 
+  String get greeting {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
+  String get formattedBalance {
+    if (!showBalance) return '••••••';
+    if (currency == 'NGN') return '₦${balance.toStringAsFixed(2)}';
+    return '$currency ${balance.toStringAsFixed(2)}';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return const SafeArea(
         child: Center(
-          child: CircularProgressIndicator(color: AppTheme.green),
+          child: CircularProgressIndicator(color: AppColors.secondary),
         ),
       );
     }
 
     return SafeArea(
       child: RefreshIndicator(
+        color: AppColors.secondary,
         onRefresh: loadDashboardData,
-        color: AppTheme.green,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(24),
+          padding: AppSpacing.screen,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Hello, $firstName 👋',
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              _Header(greeting: greeting, name: firstName),
+              const SizedBox(height: AppSpacing.xxl),
+              _WalletCard(
+                balance: formattedBalance,
+                payveraId: payveraId,
+                showBalance: showBalance,
+                onToggleBalance: () {
+                  setState(() => showBalance = !showBalance);
+                },
               ),
-              const SizedBox(height: 4),
-              Text(
-                payveraId.isEmpty ? 'Welcome to Payvera' : payveraId,
-                style: const TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: AppTheme.green,
-                  borderRadius: BorderRadius.circular(24),
-                ),
+              const SizedBox(height: AppSpacing.xxl),
+              const Text('Quick Actions', style: AppTypography.title),
+              const SizedBox(height: AppSpacing.lg),
+              const _QuickActions(),
+              const SizedBox(height: AppSpacing.xxl),
+              const Text('Recent Activity', style: AppTypography.title),
+              const SizedBox(height: AppSpacing.lg),
+              const PayveraCard(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Wallet Balance',
-                      style: TextStyle(color: Colors.white70),
+                    Icon(
+                      Icons.receipt_long_rounded,
+                      size: 44,
+                      color: AppColors.secondary,
                     ),
-                    const SizedBox(height: 10),
+                    SizedBox(height: AppSpacing.md),
                     Text(
-                      currency == 'NGN'
-                          ? '₦${balance.toStringAsFixed(2)}'
-                          : '$currency ${balance.toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        color: AppTheme.white,
-                        fontSize: 34,
-                        fontWeight: FontWeight.bold,
+                      'No transactions yet',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Fast. Secure. Borderless.',
-                      style: TextStyle(color: AppTheme.gold),
+                    SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Your payments, transfers, and wallet activity will appear here.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: AppColors.textSecondary),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 26),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                children: const [
-                  _ActionCard(title: 'Send', icon: Icons.send),
-                  _ActionCard(title: 'Receive', icon: Icons.call_received),
-                  _ActionCard(title: 'Scan QR', icon: Icons.qr_code_scanner),
-                  _ActionCard(title: 'Pay Bills', icon: Icons.receipt_long),
-                ],
               ),
             ],
           ),
@@ -195,26 +194,170 @@ class _DashboardPageState extends State<_DashboardPage> {
   }
 }
 
-class _ActionCard extends StatelessWidget {
-  const _ActionCard({required this.title, required this.icon});
+class _Header extends StatelessWidget {
+  const _Header({required this.greeting, required this.name});
+
+  final String greeting;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Image.asset('assets/app_icon.png', height: 46, width: 46),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('$greeting,', style: AppTypography.label),
+              Text(name, style: AppTypography.title),
+            ],
+          ),
+        ),
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.notifications_none_rounded),
+        ),
+      ],
+    );
+  }
+}
+
+class _WalletCard extends StatelessWidget {
+  const _WalletCard({
+    required this.balance,
+    required this.payveraId,
+    required this.showBalance,
+    required this.onToggleBalance,
+  });
+
+  final String balance;
+  final String payveraId;
+  final bool showBalance;
+  final VoidCallback onToggleBalance;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: AppSpacing.card,
+      decoration: BoxDecoration(
+        borderRadius: AppRadius.extraLarge,
+        gradient: const LinearGradient(
+          colors: [
+            AppColors.primary,
+            Color(0xFF172554),
+            AppColors.secondary,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.secondary.withValues(alpha: 0.22),
+            blurRadius: 40,
+            offset: const Offset(0, 24),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Text(
+                'PAYVERA WALLET',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: onToggleBalance,
+                icon: Icon(
+                  showBalance
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          const Text(
+            'Available Balance',
+            style: TextStyle(color: Colors.white70),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(balance, style: AppTypography.money),
+          const SizedBox(height: AppSpacing.xxl),
+          Text(
+            payveraId.isEmpty ? '@payvera_user' : payveraId,
+            style: const TextStyle(
+              color: AppColors.gold,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          const Text(
+            'Active Wallet',
+            style: TextStyle(color: Colors.white70),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickActions extends StatelessWidget {
+  const _QuickActions();
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 4,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: AppSpacing.md,
+      mainAxisSpacing: AppSpacing.md,
+      children: const [
+        _ActionItem(title: 'Send', icon: AppIcons.send),
+        _ActionItem(title: 'Receive', icon: AppIcons.receive),
+        _ActionItem(title: 'Scan', icon: AppIcons.qr),
+        _ActionItem(title: 'Fund', icon: Icons.add_card_rounded),
+      ],
+    );
+  }
+}
+
+class _ActionItem extends StatelessWidget {
+  const _ActionItem({required this.title, required this.icon});
 
   final String title;
   final IconData icon;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.green.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppTheme.green.withValues(alpha: 0.12)),
-      ),
+    return PayveraCard(
+      padding: const EdgeInsets.all(10),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: AppTheme.green, size: 34),
-          const SizedBox(height: 10),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+          Icon(icon, color: AppColors.secondary, size: 26),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ],
       ),
     );
@@ -230,20 +373,25 @@ class _SimplePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: AppTheme.green, size: 70),
-            const SizedBox(height: 16),
-            Text(
-              title,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Center(
+          child: PayveraCard(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: AppColors.secondary, size: 72),
+                const SizedBox(height: AppSpacing.lg),
+                Text(title, style: AppTypography.title),
+                const SizedBox(height: AppSpacing.sm),
+                const Text(
+                  'Coming soon',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            const Text('Coming soon'),
-          ],
+          ),
         ),
       ),
     );

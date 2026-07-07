@@ -1,93 +1,160 @@
 import 'package:flutter/material.dart';
 
-import '../../core/theme/app_theme.dart';
+import '../../core/design/app_icons.dart';
+import '../../core/design/app_radius.dart';
+import '../../core/design/app_spacing.dart';
+import '../../core/theme/colors/app_colors.dart';
+import '../../core/theme/components/app_buttons.dart';
+import '../../core/theme/typography/app_typography.dart';
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
   @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final pageController = PageController();
+  int currentPage = 0;
+
+  final pages = const [
+    _OnboardingData(
+      icon: AppIcons.wallet,
+      title: 'The Future of Money Starts Here',
+      subtitle:
+          'Send, receive, save, and manage your money with a wallet built for a borderless world.',
+    ),
+    _OnboardingData(
+      icon: Icons.account_balance_rounded,
+      title: 'Connect Banks and Cards',
+      subtitle:
+          'Link your bank accounts and cards securely to fund your wallet and move money faster.',
+    ),
+    _OnboardingData(
+      icon: AppIcons.qr,
+      title: 'Pay Anyone, Anywhere',
+      subtitle:
+          'Use Payvera ID, QR codes, bank transfers, and merchant payments from one clean app.',
+    ),
+    _OnboardingData(
+      icon: Icons.security_rounded,
+      title: 'Security at the Core',
+      subtitle:
+          'Protect your account with PIN, biometrics, trusted devices, and smart verification.',
+    ),
+  ];
+
+  void nextPage() {
+    if (currentPage == pages.length - 1) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const RegisterScreen()),
+      );
+      return;
+    }
+
+    pageController.nextPage(
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final isLastPage = currentPage == pages.length - 1;
+
     return Scaffold(
-      backgroundColor: AppTheme.white,
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: AppSpacing.screen,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'PAYVERA',
-                style: TextStyle(
-                  color: AppTheme.green,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2,
-                ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                'One app for wallet, bank transfers, QR payments, and merchants.',
-                style: TextStyle(
-                  color: AppTheme.darkText,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  height: 1.25,
-                ),
-              ),
-              const SizedBox(height: 30),
-              const _BenefitCard(
-                title: 'Fast Transfers',
-                subtitle: 'Send and receive money quickly across supported banks.',
-              ),
-              const _BenefitCard(
-                title: 'Secure Wallet',
-                subtitle: 'Protect your money with PIN, OTP, and biometrics.',
-              ),
-              const _BenefitCard(
-                title: 'Borderless Payments',
-                subtitle: 'Built for Nigeria today and Africa tomorrow.',
-              ),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.green,
-                    foregroundColor: AppTheme.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+              Row(
+                children: [
+                  Image.asset(
+  'assets/app_icon.png',
+  height: 42,
+  width: 42,
+),
+                  const SizedBox(width: AppSpacing.md),
+                  const Text(
+                    'PAYVERA',
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.8,
+                    ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const RegisterScreen(),
-                      ),
-                    );
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      );
+                    },
+                    child: const Text('Login'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              Expanded(
+                child: PageView.builder(
+                  controller: pageController,
+                  itemCount: pages.length,
+                  onPageChanged: (index) {
+                    setState(() => currentPage = index);
                   },
-                  child: const Text('Create Account'),
+                  itemBuilder: (context, index) {
+                    final page = pages[index];
+
+                    return _OnboardingPage(data: page);
+                  },
                 ),
               ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.green,
-                    side: const BorderSide(color: AppTheme.green),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  pages.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    height: 8,
+                    width: currentPage == index ? 28 : 8,
+                    decoration: BoxDecoration(
+                      color: currentPage == index
+                          ? AppColors.secondary
+                          : AppColors.border,
+                      borderRadius: AppRadius.small,
+                    ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const LoginScreen(),
-                      ),
-                    );
-                  },
-                  child: const Text('Login'),
                 ),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              PayveraButton(
+                text: isLastPage ? 'Create Account' : 'Continue',
+                onPressed: nextPage,
+              ),
+              const SizedBox(height: AppSpacing.md),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  );
+                },
+                child: const Text('Already have an account? Login'),
               ),
             ],
           ),
@@ -97,59 +164,84 @@ class OnboardingScreen extends StatelessWidget {
   }
 }
 
-class _BenefitCard extends StatelessWidget {
-  const _BenefitCard({
+class _OnboardingPage extends StatelessWidget {
+  const _OnboardingPage({required this.data});
+
+  final _OnboardingData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Spacer(),
+        Container(
+          height: 220,
+          width: 220,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(48),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.secondary.withValues(alpha: 0.18),
+                blurRadius: 45,
+                offset: const Offset(0, 24),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: -40,
+                right: -40,
+                child: CircleAvatar(
+                  radius: 80,
+                  backgroundColor: AppColors.secondary.withValues(alpha: 0.22),
+                ),
+              ),
+              Positioned(
+                bottom: -30,
+                left: -30,
+                child: CircleAvatar(
+                  radius: 70,
+                  backgroundColor: AppColors.gold.withValues(alpha: 0.16),
+                ),
+              ),
+              Center(
+                child: Icon(
+                  data.icon,
+                  size: 92,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xxxl),
+        Text(
+          data.title,
+          textAlign: TextAlign.center,
+          style: AppTypography.headline,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(
+          data.subtitle,
+          textAlign: TextAlign.center,
+          style: AppTypography.subtitle.copyWith(height: 1.55),
+        ),
+        const Spacer(),
+      ],
+    );
+  }
+}
+
+class _OnboardingData {
+  const _OnboardingData({
+    required this.icon,
     required this.title,
     required this.subtitle,
   });
 
+  final IconData icon;
   final String title;
   final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppTheme.green.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: AppTheme.green.withValues(alpha: 0.15),
-        ),
-      ),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            backgroundColor: AppTheme.gold,
-            child: Icon(Icons.check, color: AppTheme.white),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: AppTheme.darkText,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: AppTheme.darkText.withValues(alpha: 0.70),
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
