@@ -1,1 +1,37 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"payvera-42eca","configurations":{"android":"1:76695965127:android:95cb7f93b090adba681de2","ios":"1:76695965127:ios:a6b581c4590fafbe681de2","macos":"1:76695965127:ios:a6b581c4590fafbe681de2"}}},"android":{"default":{"projectId":"payvera-42eca","appId":"1:76695965127:android:95cb7f93b090adba681de2","fileOutput":"android/app/google-services.json"}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "payvera-42eca",
+          "configurations": {
+            "android": "1:76695965127:android:95cb7f93b090adba681de2",
+            "ios": "1:76695965127:ios:a6b581c4590fafbe681de2",
+            "macos": "1:76695965127:ios:a6b581c4590fafbe681de2"
+          }
+        }
+      },
+      "android": {
+        "default": {
+          "projectId": "payvera-42eca",
+          "appId": "1:76695965127:android:95cb7f93b090adba681de2",
+          "fileOutput": "android/app/google-services.json"
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ]
+    }
+  ]
+}
