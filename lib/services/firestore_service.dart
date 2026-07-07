@@ -8,7 +8,8 @@ class FirestoreService {
         .toLowerCase()
         .replaceAll(RegExp(r'[^a-z0-9]'), '');
 
-    final suffix = DateTime.now().millisecondsSinceEpoch.toString().substring(8);
+    final suffix =
+        DateTime.now().millisecondsSinceEpoch.toString().substring(8);
 
     return '@$cleaned$suffix';
   }
@@ -18,13 +19,17 @@ class FirestoreService {
     required String fullName,
     required String email,
   }) async {
+    final userRef = _db.collection('users').doc(uid);
     final walletId = 'wallet_$uid';
+    final walletRef = _db.collection('wallets').doc(walletId);
     final payveraId = generatePayveraId(fullName);
 
-    await _db.collection('users').doc(uid).set({
+    final batch = _db.batch();
+
+    batch.set(userRef, {
       'uid': uid,
       'fullName': fullName.trim(),
-      'email': email.trim(),
+      'email': email.trim().toLowerCase(),
       'phoneNumber': '',
       'payveraId': payveraId,
       'walletId': walletId,
@@ -32,15 +37,29 @@ class FirestoreService {
       'updatedAt': FieldValue.serverTimestamp(),
     });
 
-    await _db.collection('wallets').doc(walletId).set({
+    batch.set(walletRef, {
       'walletId': walletId,
       'ownerUid': uid,
-      'balance': 0.0,
+
+      // Financial balances.
+      // The mobile client must never directly modify these fields.
+      'availableBalance': 0.0,
+      'ledgerBalance': 0.0,
+
       'currency': 'NGN',
       'status': 'active',
+      'isFrozen': false,
+
+      // Temporary default limits.
+      // Later these will come from KYC tier and server-side policy.
+      'dailyLimit': 0.0,
+      'monthlyLimit': 0.0,
+
       'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     });
+
+    await batch.commit();
   }
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getUserProfile(String uid) {
@@ -49,5 +68,9 @@ class FirestoreService {
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getWallet(String walletId) {
     return _db.collection('wallets').doc(walletId).get();
+  }
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> watchWallet(String walletId) {
+    return _db.collection('wallets').doc(walletId).snapshots();
   }
 }

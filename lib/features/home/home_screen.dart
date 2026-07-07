@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
+import '../wallet/wallet_screen.dart';
 import '../../core/design/app_icons.dart';
 import '../../core/design/app_radius.dart';
 import '../../core/design/app_spacing.dart';
@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final pages = const [
     _DashboardPage(),
-    _SimplePage(title: 'Wallet', icon: AppIcons.wallet),
+    WalletScreen(),
     _SimplePage(title: 'Scan', icon: AppIcons.qr),
     _SimplePage(title: 'Activity', icon: AppIcons.activity),
     _SimplePage(title: 'Profile', icon: AppIcons.profile),
