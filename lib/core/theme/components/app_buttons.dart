@@ -29,9 +29,7 @@ class PayveraButton extends StatelessWidget {
           backgroundColor: AppColors.secondary,
           foregroundColor: Colors.white,
           padding: AppSpacing.button,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppRadius.large,
-          ),
+          shape: RoundedRectangleBorder(borderRadius: AppRadius.large),
         ),
         child: isLoading
             ? const SizedBox(

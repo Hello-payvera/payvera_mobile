@@ -28,14 +28,12 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1200),
     );
 
-    _fade = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOut,
-    );
+    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
 
-    _scale = Tween<double>(begin: 0.94, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _scale = Tween<double>(
+      begin: 0.94,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     _controller.forward();
 
@@ -85,11 +83,7 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-  'assets/logo.png',
-  width: 120,
-  height: 120,
-),
+                    Image.asset('assets/logo.png', width: 120, height: 120),
                     const SizedBox(height: 24),
                     const Text(
                       'PAYVERA',
@@ -119,10 +113,7 @@ class _SplashScreenState extends State<SplashScreen>
 }
 
 class _GlowCircle extends StatelessWidget {
-  const _GlowCircle({
-    required this.size,
-    required this.color,
-  });
+  const _GlowCircle({required this.size, required this.color});
 
   final double size;
   final Color color;
@@ -132,10 +123,7 @@ class _GlowCircle extends StatelessWidget {
     return Container(
       height: size,
       width: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: color,
-      ),
+      decoration: BoxDecoration(shape: BoxShape.circle, color: color),
     );
   }
 }

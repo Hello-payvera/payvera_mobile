@@ -12,15 +12,15 @@ class AppSpacing {
   static const double xxxl = 32;
   static const double huge = 40;
 
-  static const EdgeInsets screen =
-      EdgeInsets.symmetric(horizontal: xxl, vertical: xl);
+  static const EdgeInsets screen = EdgeInsets.symmetric(
+    horizontal: xxl,
+    vertical: xl,
+  );
 
-  static const EdgeInsets card =
-      EdgeInsets.all(xl);
+  static const EdgeInsets card = EdgeInsets.all(xl);
 
-  static const EdgeInsets button =
-      EdgeInsets.symmetric(
-        horizontal: xxl,
-        vertical: lg,
-      );
+  static const EdgeInsets button = EdgeInsets.symmetric(
+    horizontal: xxl,
+    vertical: lg,
+  );
 }

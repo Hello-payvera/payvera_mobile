@@ -11,15 +11,11 @@ class AppRadius {
   static const double xxl = 32;
   static const double pill = 100;
 
-  static BorderRadius get small =>
-      BorderRadius.circular(sm);
+  static BorderRadius get small => BorderRadius.circular(sm);
 
-  static BorderRadius get medium =>
-      BorderRadius.circular(md);
+  static BorderRadius get medium => BorderRadius.circular(md);
 
-  static BorderRadius get large =>
-      BorderRadius.circular(lg);
+  static BorderRadius get large => BorderRadius.circular(lg);
 
-  static BorderRadius get extraLarge =>
-      BorderRadius.circular(xl);
+  static BorderRadius get extraLarge => BorderRadius.circular(xl);
 }

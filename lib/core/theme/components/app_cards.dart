@@ -31,9 +31,7 @@ class PayveraCard extends StatelessWidget {
           padding: padding,
           decoration: BoxDecoration(
             borderRadius: AppRadius.extraLarge,
-            border: Border.all(
-              color: AppColors.border,
-            ),
+            border: Border.all(color: AppColors.border),
           ),
           child: child,
         ),

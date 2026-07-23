@@ -53,15 +53,15 @@ class _LoginScreenState extends State<LoginScreen> {
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? 'Login failed')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message ?? 'Login failed')));
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unexpected error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unexpected error: $e')));
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
@@ -69,9 +69,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> resetPassword() async {
     if (emailController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Enter your email first')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Enter your email first')));
       return;
     }
 
@@ -79,9 +79,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Password reset email sent')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Password reset email sent')));
   }
 
   @override
@@ -106,12 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 icon: const Icon(Icons.arrow_back_rounded),
               ),
               const SizedBox(height: AppSpacing.lg),
-              Center(
-                child: Image.asset(
-                  'assets/logo.png',
-                  height: 70,
-                ),
-              ),
+              Center(child: Image.asset('assets/logo.png', height: 70)),
               const SizedBox(height: AppSpacing.xxxl),
               Text('Welcome back', style: AppTypography.headline),
               const SizedBox(height: AppSpacing.sm),

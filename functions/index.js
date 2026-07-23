@@ -1,11 +1,11 @@
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest, onCall, HttpsError} = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
-const { FieldValue } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
+const { setGlobalOptions } = require("firebase-functions");
 
 admin.initializeApp();
 
-const db = admin.firestore();
+const db = getFirestore();
 
 setGlobalOptions({
   maxInstances: 10,
@@ -31,10 +31,14 @@ function generateReference(prefix = "PV") {
 }
 
 exports.internalTransfer = onCall(async (request) => {
+console.log("================================");
+console.log("internalTransfer called");
+console.log("AUTH:", request.auth);
+console.log("DATA:", request.data);
+console.log("================================");
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Login required.");
   }
-
   const senderUid = request.auth.uid;
   const {
     receiverPayveraId,
@@ -236,4 +240,96 @@ exports.internalTransfer = onCall(async (request) => {
 
     return response;
   });
+});
+
+exports.fundWallet = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated",
+      "Login required."
+    );
+  }
+
+  const uid = request.auth.uid;
+
+  const amount = Number(request.data.amount);
+  const reference = request.data.reference;
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Invalid amount."
+    );
+  }
+
+  if (!reference) {
+    throw new HttpsError(
+      "invalid-argument",
+      "Reference is required."
+    );
+  }
+
+  const userRef = db.collection("users").doc(uid);
+
+  const userDoc = await userRef.get();
+
+  if (!userDoc.exists) {
+    throw new HttpsError(
+      "not-found",
+      "User not found."
+    );
+  }
+
+  const user = userDoc.data();
+
+  const walletRef = db.collection("wallets").doc(user.walletId);
+
+  const walletDoc = await walletRef.get();
+
+  if (!walletDoc.exists) {
+    throw new HttpsError(
+      "not-found",
+      "Wallet not found."
+    );
+  }
+
+  const wallet = walletDoc.data();
+
+  const available =
+      Number(wallet.availableBalance ?? 0);
+
+  const ledger =
+      Number(wallet.ledgerBalance ?? 0);
+
+  await walletRef.update({
+    availableBalance: available + amount,
+    ledgerBalance: ledger + amount,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+
+  const txRef = db.collection("transactions").doc();
+
+  await txRef.set({
+    transactionId: txRef.id,
+    ownerUid: uid,
+    walletId: user.walletId,
+    type: "walletFunding",
+    direction: "credit",
+    status: "successful",
+    amount: amount,
+    currency: wallet.currency ?? "NGN",
+    provider: "paystack",
+    providerReference: reference,
+    reference: reference,
+    description: "Wallet Funding",
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+    completedAt: FieldValue.serverTimestamp(),
+  });
+
+  return {
+    success: true,
+    message: "Wallet funded successfully.",
+    balance: available + amount,
+  };
 });

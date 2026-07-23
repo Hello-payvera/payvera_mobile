@@ -116,6 +116,16 @@ class _TransactionTile extends StatelessWidget {
 
   bool get isCredit => transaction.direction == TransactionDirection.credit;
 
+  String get subtitle {
+    final payveraId = transaction.counterpartyPayveraId;
+
+    if (payveraId != null && payveraId.isNotEmpty) {
+      return isCredit ? 'From $payveraId' : 'To $payveraId';
+    }
+
+    return transaction.status.name.toUpperCase();
+  }
+
   String get amountText {
     final prefix = isCredit ? '+' : '-';
     final currency = transaction.currency == 'NGN' ? '₦' : transaction.currency;
@@ -191,22 +201,48 @@ class _TransactionTile extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  transaction.status.name.toUpperCase(),
-                  style: TextStyle(
-                    color: statusColor,
+                  subtitle,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
                     fontSize: 12,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    transaction.status.name.toUpperCase(),
+                    style: TextStyle(
+                      color: statusColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-          Text(
-            amountText,
-            style: TextStyle(
-              color: isCredit ? AppColors.success : AppColors.textPrimary,
-              fontWeight: FontWeight.w800,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                amountText,
+                style: TextStyle(
+                  color: isCredit ? AppColors.success : AppColors.textPrimary,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
           ),
         ],
       ),

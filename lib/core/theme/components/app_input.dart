@@ -39,16 +39,11 @@ class PayveraTextField extends StatelessWidget {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: AppRadius.large,
-          borderSide: const BorderSide(
-            color: AppColors.border,
-          ),
+          borderSide: const BorderSide(color: AppColors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppRadius.large,
-          borderSide: const BorderSide(
-            color: AppColors.secondary,
-            width: 2,
-          ),
+          borderSide: const BorderSide(color: AppColors.secondary, width: 2),
         ),
       ),
     );

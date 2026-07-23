@@ -81,11 +81,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: [
               Row(
                 children: [
-                  Image.asset(
-  'assets/app_icon.png',
-  height: 42,
-  width: 42,
-),
+                  Image.asset('assets/app_icon.png', height: 42, width: 42),
                   const SizedBox(width: AppSpacing.md),
                   const Text(
                     'PAYVERA',
@@ -206,13 +202,7 @@ class _OnboardingPage extends StatelessWidget {
                   backgroundColor: AppColors.gold.withValues(alpha: 0.16),
                 ),
               ),
-              Center(
-                child: Icon(
-                  data.icon,
-                  size: 92,
-                  color: Colors.white,
-                ),
-              ),
+              Center(child: Icon(data.icon, size: 92, color: Colors.white)),
             ],
           ),
         ),

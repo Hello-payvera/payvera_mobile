@@ -66,9 +66,7 @@ class _WalletScreenState extends State<WalletScreen> {
     if (id == null || id.isEmpty) {
       return const SafeArea(
         child: Center(
-          child: CircularProgressIndicator(
-            color: AppColors.secondary,
-          ),
+          child: CircularProgressIndicator(color: AppColors.secondary),
         ),
       );
     }
@@ -87,9 +85,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.secondary,
-              ),
+              child: CircularProgressIndicator(color: AppColors.secondary),
             );
           }
 
@@ -103,17 +99,13 @@ class _WalletScreenState extends State<WalletScreen> {
             );
           }
 
-          final availableBalance = (
-            walletData['availableBalance'] ??
-            walletData['balance'] ??
-            0
-          ).toDouble();
+          final availableBalance =
+              (walletData['availableBalance'] ?? walletData['balance'] ?? 0)
+                  .toDouble();
 
-          final ledgerBalance = (
-            walletData['ledgerBalance'] ??
-            walletData['balance'] ??
-            0
-          ).toDouble();
+          final ledgerBalance =
+              (walletData['ledgerBalance'] ?? walletData['balance'] ?? 0)
+                  .toDouble();
 
           final currency = walletData['currency'] ?? 'NGN';
           final status = walletData['status'] ?? 'unknown';
@@ -138,19 +130,13 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                   const SizedBox(height: AppSpacing.xxl),
                   _BalanceCard(
-                    balance: formatBalance(
-                      currency,
-                      availableBalance,
-                    ),
+                    balance: formatBalance(currency, availableBalance),
                     currency: currency,
                     status: status,
                     isFrozen: isFrozen,
                   ),
                   const SizedBox(height: AppSpacing.xxl),
-                  Text(
-                    'Wallet Details',
-                    style: AppTypography.title,
-                  ),
+                  Text('Wallet Details', style: AppTypography.title),
                   const SizedBox(height: AppSpacing.lg),
                   PayveraCard(
                     child: Column(
@@ -158,19 +144,13 @@ class _WalletScreenState extends State<WalletScreen> {
                         _WalletDetailRow(
                           icon: Icons.account_balance_wallet_rounded,
                           label: 'Available Balance',
-                          value: formatBalance(
-                            currency,
-                            availableBalance,
-                          ),
+                          value: formatBalance(currency, availableBalance),
                         ),
                         const Divider(height: 32),
                         _WalletDetailRow(
                           icon: Icons.menu_book_rounded,
                           label: 'Ledger Balance',
-                          value: formatBalance(
-                            currency,
-                            ledgerBalance,
-                          ),
+                          value: formatBalance(currency, ledgerBalance),
                         ),
                         const Divider(height: 32),
                         _WalletDetailRow(
@@ -182,9 +162,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         _WalletDetailRow(
                           icon: Icons.verified_user_outlined,
                           label: 'Status',
-                          value: isFrozen
-                              ? 'Frozen'
-                              : status.toUpperCase(),
+                          value: isFrozen ? 'Frozen' : status.toUpperCase(),
                         ),
                       ],
                     ),
@@ -201,9 +179,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         const Expanded(
                           child: Text(
                             'Balance-changing operations will be processed securely by Payvera server-side services.',
-                            style: TextStyle(
-                              color: AppColors.textSecondary,
-                            ),
+                            style: TextStyle(color: AppColors.textSecondary),
                           ),
                         ),
                       ],
@@ -240,11 +216,7 @@ class _BalanceCard extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: AppRadius.extraLarge,
         gradient: const LinearGradient(
-          colors: [
-            AppColors.primary,
-            Color(0xFF172554),
-            AppColors.secondary,
-          ],
+          colors: [AppColors.primary, Color(0xFF172554), AppColors.secondary],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -274,9 +246,7 @@ class _BalanceCard extends StatelessWidget {
               ),
               const Spacer(),
               Icon(
-                isFrozen
-                    ? Icons.lock_rounded
-                    : Icons.check_circle_rounded,
+                isFrozen ? Icons.lock_rounded : Icons.check_circle_rounded,
                 color: isFrozen ? Colors.orangeAccent : Colors.white,
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -315,9 +285,7 @@ class _WalletDetailRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-            ),
+            style: const TextStyle(color: AppColors.textSecondary),
           ),
         ),
         Text(
@@ -359,9 +327,7 @@ class _WalletMessage extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                ),
+                style: const TextStyle(color: AppColors.textSecondary),
               ),
             ],
           ),

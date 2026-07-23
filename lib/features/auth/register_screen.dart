@@ -33,9 +33,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (fullNameController.text.trim().isEmpty ||
         emailController.text.trim().isEmpty ||
         passwordController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Please fill all fields')));
       return;
     }
 
@@ -72,9 +72,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unexpected error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unexpected error: $e')));
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
@@ -104,19 +104,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              Center(
-                child: Image.asset(
-                  'assets/logo.png',
-                  height: 70,
-                ),
-              ),
+              Center(child: Image.asset('assets/logo.png', height: 70)),
 
               const SizedBox(height: AppSpacing.xxxl),
 
-              Text(
-                'Create your account',
-                style: AppTypography.headline,
-              ),
+              Text('Create your account', style: AppTypography.headline),
               const SizedBox(height: AppSpacing.sm),
               Text(
                 'Start your secure digital wallet journey with Payvera.',
@@ -169,9 +161,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const LoginScreen(),
-                        ),
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
                       );
                     },
                     child: const Text('Login'),
