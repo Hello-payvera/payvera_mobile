@@ -1,5 +1,5 @@
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:flutter/foundation.dart';
+import '../core/utils/logger.dart';
 
 class TransferService {
   Future<Map<String, dynamic>> internalTransfer({
@@ -7,8 +7,8 @@ class TransferService {
     required double amount,
     String description = '',
   }) async {
-    debugPrint("Calling internalTransfer...");
-    debugPrint("Host: ${FirebaseFunctions.instance.app.name}");
+    Logger.info("Calling internalTransfer");
+    Logger.info("Host: ${FirebaseFunctions.instance.app.name}");
 
     final callable = FirebaseFunctions.instance.httpsCallable(
       'internalTransfer',
@@ -21,8 +21,8 @@ class TransferService {
       'idempotencyKey': DateTime.now().millisecondsSinceEpoch.toString(),
     });
 
-    debugPrint("Function returned:");
-    debugPrint(response.data.toString());
+    Logger.success("Transfer completed");
+    Logger.info(response.data.toString());
 
     return Map<String, dynamic>.from(response.data);
   }

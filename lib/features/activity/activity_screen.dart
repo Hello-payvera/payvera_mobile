@@ -21,6 +21,9 @@ class _ActivityScreenState extends State<ActivityScreen> {
 
   String? walletId;
 
+final TextEditingController _searchController = TextEditingController();
+
+
   @override
   void initState() {
     super.initState();
@@ -92,6 +95,17 @@ class _ActivityScreenState extends State<ActivityScreen> {
                 const Text(
                   'Track your Payvera wallet transactions.',
                   style: AppTypography.subtitle,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+
+                TextField(
+                  controller: _searchController,
+                  onChanged: (_) => setState(() {}),
+                  decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.search_rounded),
+                    hintText: 'Search transactions...',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
                 ...transactions.map(
@@ -284,3 +298,10 @@ class _ActivityMessage extends StatelessWidget {
     );
   }
 }
+
+
+
+
+
+
+

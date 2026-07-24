@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../services/services_screen.dart';
 import '../../core/design/app_icons.dart';
 import '../../core/theme/colors/app_colors.dart';
 import '../activity/activity_screen.dart';
@@ -19,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> pages = const [
     DashboardPage(),
     WalletScreen(),
-    _PlaceholderPage(title: 'Scan', icon: AppIcons.qr),
+    ServicesScreen(),
     ActivityScreen(),
     _PlaceholderPage(title: 'Profile', icon: AppIcons.profile),
   ];

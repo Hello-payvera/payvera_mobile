@@ -227,6 +227,13 @@ console.log("================================");
       currency: senderWallet.currency || "NGN",
       senderTransactionId: senderTransactionRef.id,
       receiverTransactionId: receiverTransactionRef.id,
+      receiverUid,
+      receiverName:
+        receiverUser.fullName ||
+        receiverUser.displayName ||
+        "",
+      receiverPayveraId:
+        receiverUser.payveraId || "",
     };
 
     transaction.set(idempotencyRef, {

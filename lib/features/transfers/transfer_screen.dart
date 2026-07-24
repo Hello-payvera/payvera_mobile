@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../services/transfer_service.dart';
+import '../../services/beneficiary_service.dart';
+import 'beneficiaries_screen.dart';
+import '../../models/beneficiary_model.dart';
+import '../../core/utils/logger.dart';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import '../../core/design/app_spacing.dart';
@@ -24,6 +28,9 @@ class _TransferScreenState extends State<TransferScreen> {
   bool _loading = false;
 
   final _transferService = TransferService();
+
+final _beneficiaryService =
+    BeneficiaryService();
 
   @override
   void dispose() {
@@ -69,6 +76,13 @@ class _TransferScreenState extends State<TransferScreen> {
         description: _descriptionController.text.trim(),
       );
 
+      await _beneficiaryService.saveBeneficiary(
+        receiverUid: result['receiverUid'] ?? '',
+        payveraId: _payveraIdController.text.trim(),
+        fullName: result['receiverName'] ?? _payveraIdController.text.trim(),
+      );
+
+
       if (!mounted) return;
 
       await showDialog(
@@ -89,11 +103,11 @@ class _TransferScreenState extends State<TransferScreen> {
 
       Navigator.pop(context);
     } on FirebaseFunctionsException catch (e) {
-      debugPrint("========== FIREBASE FUNCTION ERROR ==========");
-      debugPrint("Code: ${e.code}");
-      debugPrint("Message: ${e.message}");
-      debugPrint("Details: ${e.details}");
-      debugPrint("=============================================");
+      Logger.error("Transfer failed");
+      Logger.error("Code: ${e.code}");
+      Logger.error("Message: ${e.message}");
+      Logger.error("Details: ${e.details}");
+      
 
       if (!mounted) return;
 
@@ -111,7 +125,7 @@ class _TransferScreenState extends State<TransferScreen> {
         ),
       );
     } catch (e) {
-      debugPrint(e.toString());
+      Logger.error(e.toString());
 
       if (!mounted) return;
 
@@ -153,6 +167,28 @@ class _TransferScreenState extends State<TransferScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Transfer via Payvera ID', style: AppTypography.headline),
+
+const SizedBox(height: 12),
+
+OutlinedButton.icon(
+  onPressed: () async {
+    final BeneficiaryModel? beneficiary =
+        await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const BeneficiariesScreen(),
+      ),
+    );
+
+    if (beneficiary != null) {
+      _payveraIdController.text =
+          beneficiary.payveraId;
+    }
+  },
+  icon: const Icon(Icons.people),
+  label: const Text("Choose Beneficiary"),
+),
+
                 const SizedBox(height: AppSpacing.sm),
                 const Text(
                   'Send money instantly to another Payvera user.',
@@ -245,3 +281,9 @@ class _TransferScreenState extends State<TransferScreen> {
     );
   }
 }
+
+
+
+
+
+
